@@ -1,13 +1,14 @@
 <?php
-$host = "localhost";
-$username = "root";
-$password = "";
-$dbname = "github_portfolio";
-
-if (file_exists('config.local.php')){
-    require_once 'config.local.php';
+if (!file_exists(__DIR__ . '/.env')){
+    die("Error: .env file is missing. Please create one based on .env.example.");
 }
 
+$env = parse_ini_file(__DIR__ . '/.env');
+
+$host = $env['DB_HOST'];
+$username = $env['DB_USER'];
+$password = $env['DB_PASS'];
+$dbname = $env['DB_NAME'];
 
 $mysqli = new mysqli($host, $username, $password);
 

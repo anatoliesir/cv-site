@@ -17,6 +17,5 @@ Desktop.ini
 # Fișiere jurnal sau erori locale (dacă se vor genera pe parcurs)
 *.log
 
-# Fișiere de configurare locală și secrete
-config.local.php
+# Ascundem datele tale personale / locale
 .env

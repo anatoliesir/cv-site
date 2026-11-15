@@ -25,7 +25,7 @@ if ($mysqli->query($sql_db) === TRUE){
 
 $sql_table = "CREATE TABLE IF NOT EXISTS `projects` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
-    `repo_name` VARCHAR(255) NOT NULL,
+    `repo_name` VARCHAR(255) NOT NULL UNIQUE,
     `description` TEXT,
     `repo_url` VARCHAR(255) NOT NULL,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP

@@ -4,6 +4,11 @@ $username = "root";
 $password = "";
 $dbname = "github_portfolio";
 
+if (file_exists('config.local.php')){
+    require_once 'config.local.php';
+}
+
+
 $mysqli = new mysqli($host, $username, $password);
 
 if ($mysqli -> connect_error){
@@ -29,7 +34,5 @@ if ($mysqli->query($sql_table) === TRUE){
 } else{
     die("Error creating table: " . $mysqli->error);
 }
-
-
 
 ?>

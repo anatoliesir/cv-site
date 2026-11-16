@@ -23,17 +23,29 @@ if ($mysqli->query($sql_db) === TRUE){
     die("Error creating database: " . $mysqli->error);
 }
 
-$sql_table = "CREATE TABLE IF NOT EXISTS `projects` (
+$sql_users_table = "CREATE TABLE IF NOT EXISTS `users` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
-    `repo_name` VARCHAR(255) NOT NULL,
-    `description` TEXT,
-    `repo_url` VARCHAR(255) NOT NULL,
+    `github_username` VARCHAR(255) NOT NULL UNIQUE,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
-if ($mysqli->query($sql_table) === TRUE){
-} else{
-    die("Error creating table: " . $mysqli->error);
+if (!$mysqli->query($sql_users_table)) {
+    die("Error creating users table: " . $mysqli->error);
+}
+
+$sql_projects_table = "CREATE TABLE IF NOT EXISTS `projects` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `user_id` INT NOT NULL,
+    `repo_name` VARCHAR(255) NOT NULL,
+    `description` TEXT,
+    `repo_url` VARCHAR(255) NOT NULL,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE,
+    UNIQUE KEY `unique_user_repo` (`user_id`, `repo_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+
+if (!$mysqli->query($sql_projects_table)) {
+    die("Error creating projects table: " . $mysqli->error);
 }
 
 ?>

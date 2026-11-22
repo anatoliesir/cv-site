@@ -40,8 +40,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST'){
 
         $page_repos = json_decode($response, true);
 
-        if (!is_array($page_repos) || empty($page_repos)) {
-            break; 
+        if (json_last_error() !== JSON_ERROR_NONE || !is_array($page_repos)) {
+            echo "<p style='color: red;'>Error: Invalid JSON response received from GitHub API.</p>";
+            echo "<br><a href='index.php'>Back to form</a>";
+            exit();
+        }
+
+        if (empty($page_repos)) {
+            break;
         }
 
         $all_repositories = array_merge($all_repositories, $page_repos);

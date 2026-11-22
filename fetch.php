@@ -1,8 +1,15 @@
 <?php
 require_once "config.php";
+require_once "session.php";
+
+if (!is_logged_in()){
+    header("Location: login.php");
+    exit();
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST'){
     $username = trim($_POST['username'] ?? '');
+    $user_id = current_user_id();
 
     if (empty($username)) die("Error: Username cannot be empty.");
 
@@ -16,8 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST'){
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $api_url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)');
-        
+        curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)');        
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
         curl_setopt($ch, CURLOPT_TIMEOUT, 10);    
 
@@ -59,12 +65,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST'){
         $page++;
     }
     
-    $stmt_user = $mysqli->prepare("INSERT INTO `users` (`github_username`) VALUES (?) 
-                                   ON DUPLICATE KEY UPDATE `id` = LAST_INSERT_ID(`id`)");
-    $stmt_user->bind_param("s", $username);
+    $check_gh = $mysqli->prepare("SELECT `id` FROM `users` WHERE `github_username` = ? AND `id` != ?");
+    $check_gh->bind_param("si", $username, $user_id);
+    $check_gh->execute();
+    $check_gh->store_result();
+
+    if ($check_gh->num_rows() > 0){
+        $check_gh->close();
+        echo "<p style='color: red;'>Error: This GitHub username is already linked to another account.</p>";
+        echo "<br><a href='index.php'>Back to profile</a>";
+        exit();
+    }
+    $check_gh->close();
+
+
+    $stmt_user = $mysqli->prepare("UPDATE `users` SET `github_username` = ? WHERE `id` = ?");
+    $stmt_user->bind_param("si", $username, $user_id);
     $stmt_user->execute();
-    $user_id = $mysqli->insert_id;
     $stmt_user->close();
+
+    $_SESSION['github_username'] = $username;
 
     $stmt_repo = $mysqli->prepare("INSERT INTO `projects` (`user_id`, `repo_name`, `description`, `repo_url`) 
                                    VALUES (?, ?, ?, ?)
@@ -80,12 +100,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST'){
     }
     $stmt_repo->close();
 
-    
-
-    header("Location: index.php?user=" . urlencode($username) . "&success=1");
+    header("Location: index.php?user=" . urlencode($username) . "&fetched=1");
     exit();
-    } 
-else {
+} else {
     header("Location: index.php");
     exit();
 }

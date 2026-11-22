@@ -25,7 +25,9 @@ if ($mysqli->query($sql_db) === TRUE){
 
 $sql_users_table = "CREATE TABLE IF NOT EXISTS `users` (
     `id` INT AUTO_INCREMENT PRIMARY KEY,
-    `github_username` VARCHAR(255) NOT NULL UNIQUE,
+    `email` VARCHAR(255) DEFAULT NULL UNIQUE,
+    `password_hash` VARCHAR(255) DEFAULT NULL,
+    `github_username` VARCHAR(255) DEFAULT NULL UNIQUE,
     `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
 
@@ -46,6 +48,25 @@ $sql_projects_table = "CREATE TABLE IF NOT EXISTS `projects` (
 
 if (!$mysqli->query($sql_projects_table)) {
     die("Error creating projects table: " . $mysqli->error);
+}
+
+$sql_cv_table = "CREATE TABLE IF NOT EXISTS `cv_profiles` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `user_id` INT NOT NULL UNIQUE,
+    `full_name` VARCHAR(255) DEFAULT '',
+    `headline` VARCHAR(255) DEFAULT '',
+    `summary` TEXT,
+    `experience` TEXT,
+    `education` TEXT,
+    `skills` TEXT,
+    `contact_email` VARCHAR(255) DEFAULT '',
+    `website` VARCHAR(255) DEFAULT '',
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+
+if (!$mysqli->query($sql_cv_table)) {
+    die("Error creating cv_profiles table: " . $mysqli->error);
 }
 
 ?>
